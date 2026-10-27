@@ -1,0 +1,18 @@
+{
+  "name": "osorio-cigar-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "OSORIO CIGAR'S client web app and private owner panel",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js && node --check assistant.js && node --check panel.js && node --check qr.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "pg": "^8.16.3"
+  }
+}

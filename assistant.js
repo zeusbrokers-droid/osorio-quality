@@ -2,16 +2,21 @@
   'use strict';
 
   const WHATSAPP_NUMBER = '17865470805';
+  const BUSINESS_ID = (new URLSearchParams(window.location.search).get('business') || 'OSORIO-CIGARS-MIA-001')
+    .replace(/[^a-zA-Z0-9_-]/g, '')
+    .slice(0, 80) || 'OSORIO-CIGARS-MIA-001';
 
   const copy = {
     es: {
       online: 'Asistente web · atención inmediata',
-      privacy: 'Tus respuestas permanecen en este dispositivo hasta que decidas abrir WhatsApp.',
-      intro: '¡Hola! Soy el asistente web de Osorio Cigar\'s. Antes de ayudarte con nuestros puros premium, ¿confirmas que tienes 21 años o más?',
+      privacy: 'Al continuar, tu ficha se registra de forma privada para que el equipo pueda atenderte.',
+      intro: 'Antes de ayudarte con nuestros puros premium estilo cubano, ¿confirmas que tienes 21 años o más?',
       ageYes: 'Sí, tengo 21+',
       ageNo: 'No',
       notEligible: 'Gracias por responder. No podemos ofrecer ni facilitar productos de tabaco a personas menores de 21 años.',
       askName: 'Perfecto. ¿Cuál es tu nombre?',
+      askPhone: '¿Cuál es tu número de teléfono o WhatsApp?',
+      invalidPhone: 'Escribe un número válido con código de área.',
       askIntent: 'Gracias, {name}. ¿Qué estás buscando?',
       intents: {
         personal: 'Compra personal',
@@ -33,6 +38,7 @@
       summaryTitle: 'NUEVO PROSPECTO — OSORIO CIGAR\'S',
       labels: {
         name: 'Cliente',
+        phone: 'Teléfono / WhatsApp',
         age: '21+ confirmado',
         intent: 'Interés',
         quantity: 'Cantidad aproximada',
@@ -51,12 +57,14 @@
     },
     en: {
       online: 'Web assistant · immediate response',
-      privacy: 'Your answers stay on this device until you choose to open WhatsApp.',
-      intro: 'Hello! I am the Osorio Cigar\'s web assistant. Before I help with our premium cigars, can you confirm that you are 21 or older?',
+      privacy: 'When you continue, your lead card is privately registered so the team can assist you.',
+      intro: 'Before I help with our premium Cuban-style cigars, can you confirm that you are 21 or older?',
       ageYes: 'Yes, I am 21+',
       ageNo: 'No',
       notEligible: 'Thank you for answering. We cannot offer or facilitate tobacco products to anyone under 21.',
       askName: 'Perfect. What is your name?',
+      askPhone: 'What is your phone or WhatsApp number?',
+      invalidPhone: 'Enter a valid number including area code.',
       askIntent: 'Thank you, {name}. What are you looking for?',
       intents: {
         personal: 'Personal purchase',
@@ -78,6 +86,7 @@
       summaryTitle: 'NEW LEAD — OSORIO CIGAR\'S',
       labels: {
         name: 'Customer',
+        phone: 'Phone / WhatsApp',
         age: '21+ confirmed',
         intent: 'Interest',
         quantity: 'Approximate quantity',
@@ -238,6 +247,18 @@
     addMessage(cleaned, 'user');
     if (step === 'name') {
       state.name = cleaned.slice(0, 80);
+      step = 'phone';
+      addMessage(t().askPhone);
+      setFormVisible(true, 'tel');
+      return;
+    }
+
+    if (step === 'phone') {
+      if (cleaned.replace(/\D/g, '').length < 7) {
+        addMessage(t().invalidPhone);
+        return;
+      }
+      state.phone = cleaned.slice(0, 40);
       setFormVisible(false);
       askIntent();
       return;
@@ -287,6 +308,7 @@
     const rows = [
       `*${t().summaryTitle}*`,
       `${labels.name}: ${state.name}`,
+      `${labels.phone}: ${state.phone}`,
       `${labels.age}: ${t().yes}`,
       `${labels.intent}: ${state.intentLabel}`,
       `${labels.quantity}: ${state.quantity}`
@@ -315,6 +337,30 @@
     whatsapp.target = '_blank';
     whatsapp.rel = 'noopener';
     whatsapp.textContent = t().send;
+    whatsapp.addEventListener('click', () => {
+      const payload = {
+        name: state.name,
+        phone: state.phone,
+        language,
+        ageConfirmed: true,
+        intent: state.intent,
+        intentLabel: state.intentLabel,
+        quantity: state.quantity,
+        date: state.date || '',
+        location: state.location,
+        time: state.time,
+        timeLabel: state.timeLabel,
+        classification: classifyLead(),
+        source: 'web',
+        businessId: BUSINESS_ID
+      };
+      fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        keepalive: true
+      }).catch(() => {});
+    });
 
     const disclaimer = document.createElement('p');
     disclaimer.className = 'oq-assistant-disclaimer';

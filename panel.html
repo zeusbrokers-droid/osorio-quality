@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080808">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Panel privado | OSORIO CIGAR'S</title>
+  <link rel="stylesheet" href="panel.css">
+</head>
+<body>
+  <main class="shell">
+    <section class="login-card" id="loginView">
+      <div class="brand-mark">O</div>
+      <p class="eyebrow">OSORIO CIGAR'S</p>
+      <h1>Panel privado</h1>
+      <p class="muted">Prospectos recibidos desde la web y WhatsApp.</p>
+      <form id="loginForm">
+        <label for="password">Contraseña</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+        <button type="submit">Entrar al panel</button>
+        <p class="error" id="loginError" role="alert"></p>
+      </form>
+    </section>
+
+    <section class="dashboard" id="dashboardView" hidden>
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">OSORIO CIGAR'S</p>
+          <h1>Prospectos</h1>
+          <p class="muted">Puros premium estilo cubano · Miami</p>
+        </div>
+        <div class="top-actions">
+          <a href="/qr" class="secondary">Generador QR</a>
+          <button id="refreshButton" class="secondary" type="button">Actualizar</button>
+          <button id="logoutButton" class="ghost" type="button">Salir</button>
+        </div>
+      </header>
+
+      <section class="stats" aria-label="Resumen de prospectos">
+        <article><span id="totalCount">0</span><small>Total</small></article>
+        <article><span id="hotCount">0</span><small>Calientes</small></article>
+        <article><span id="newCount">0</span><small>Nuevos</small></article>
+      </section>
+
+      <div class="toolbar">
+        <label for="filter">Mostrar</label>
+        <select id="filter">
+          <option value="all">Todos</option>
+          <option value="CALIENTE">Calientes</option>
+          <option value="TIBIO">Tibios</option>
+          <option value="new">Nuevos</option>
+          <option value="contacted">Contactados</option>
+          <option value="closed">Cerrados</option>
+        </select>
+        <span id="lastUpdated" class="muted"></span>
+      </div>
+
+      <div class="empty" id="emptyState" hidden>No hay prospectos con este filtro.</div>
+      <section class="lead-list" id="leadList" aria-live="polite"></section>
+    </section>
+  </main>
+  <script src="panel.js"></script>
+</body>
+</html>

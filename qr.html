@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080808">
+  <title>Generador QR | OSORIO CIGAR'S</title>
+  <link rel="stylesheet" href="qr.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="mark">O</div>
+      <p>OSORIO CIGAR'S</p>
+      <h1>Generador QR de negocio</h1>
+      <span>Puros premium estilo cubano · Hechos a mano en Miami</span>
+    </header>
+    <section class="layout">
+      <form id="qrForm" class="card">
+        <label for="businessId">Identificador del negocio</label>
+        <input id="businessId" maxlength="80" value="OSORIO-CIGARS-MIA-001" required>
+        <label for="qrType">Tipo de QR</label>
+        <select id="qrType">
+          <option value="vcard">Guardar contacto comercial</option>
+          <option value="whatsapp">Abrir WhatsApp</option>
+          <option value="website">Abrir web para clientes</option>
+          <option value="custom">Enlace personalizado</option>
+        </select>
+        <div id="customWrap" hidden>
+          <label for="customValue">Enlace personalizado</label>
+          <input id="customValue" type="url" placeholder="https://">
+        </div>
+        <button type="submit">Generar QR</button>
+        <a href="/panel" class="back">Volver al panel</a>
+      </form>
+      <section class="preview card">
+        <div id="qrcode" aria-label="Código QR generado"></div>
+        <strong id="qrId">OSORIO-CIGARS-MIA-001</strong>
+        <p id="qrDescription">Contacto comercial de OSORIO CIGAR'S</p>
+        <div class="actions">
+          <button id="downloadButton" type="button">Descargar PNG</button>
+          <button id="printButton" type="button" class="secondary">Imprimir</button>
+        </div>
+      </section>
+    </section>
+  </main>
+  <script src="qr.js"></script>
+</body>
+</html>
