@@ -7,7 +7,7 @@
     es: {
       online: 'Asistente web · atención inmediata',
       privacy: 'Tus respuestas permanecen en este dispositivo hasta que decidas abrir WhatsApp.',
-      intro: '¡Hola! Soy el asistente web de Osorio Quality. Antes de ayudarte con nuestros puros premium, ¿confirmas que tienes 21 años o más?',
+      intro: '¡Hola! Soy el asistente web de Osorio Cigar\'s. Antes de ayudarte con nuestros puros premium, ¿confirmas que tienes 21 años o más?',
       ageYes: 'Sí, tengo 21+',
       ageNo: 'No',
       notEligible: 'Gracias por responder. No podemos ofrecer ni facilitar productos de tabaco a personas menores de 21 años.',
@@ -30,7 +30,7 @@
         evening: 'En la noche'
       },
       summaryIntro: 'Listo. Revisa la ficha y envíala por WhatsApp para que el equipo confirme disponibilidad, precio y los próximos pasos.',
-      summaryTitle: 'NUEVO PROSPECTO — OSORIO QUALITY',
+      summaryTitle: 'NUEVO PROSPECTO — OSORIO CIGAR\'S',
       labels: {
         name: 'Cliente',
         age: '21+ confirmado',
@@ -52,7 +52,7 @@
     en: {
       online: 'Web assistant · immediate response',
       privacy: 'Your answers stay on this device until you choose to open WhatsApp.',
-      intro: 'Hello! I am the Osorio Quality web assistant. Before I help with our premium cigars, can you confirm that you are 21 or older?',
+      intro: 'Hello! I am the Osorio Cigar\'s web assistant. Before I help with our premium cigars, can you confirm that you are 21 or older?',
       ageYes: 'Yes, I am 21+',
       ageNo: 'No',
       notEligible: 'Thank you for answering. We cannot offer or facilitate tobacco products to anyone under 21.',
@@ -75,7 +75,7 @@
         evening: 'Evening'
       },
       summaryIntro: 'Done. Review the lead card and send it through WhatsApp so the team can confirm availability, pricing, and next steps.',
-      summaryTitle: 'NEW LEAD — OSORIO QUALITY',
+      summaryTitle: 'NEW LEAD — OSORIO CIGAR\'S',
       labels: {
         name: 'Customer',
         age: '21+ confirmed',

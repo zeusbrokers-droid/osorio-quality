@@ -1,2 +1,2 @@
-# osorio-quality
-Sitio web de Osorio Quality – Premium Cigars | Hecho a Mano | Miami, FL
+# OSORIO CIGAR'S
+Sitio web de OSORIO CIGAR'S – Premium Cigars | Hecho a Mano | Miami, FL
