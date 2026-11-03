@@ -10,9 +10,6 @@ const PORT = Number(process.env.PORT || 3000);
 const PANEL_PASSWORD = process.env.PANEL_PASSWORD || '';
 const SESSION_SECRET = process.env.SESSION_SECRET || '';
 const DATABASE_URL = process.env.DATABASE_URL || '';
-const WHATSAPP_AGENT_URL = String(process.env.WHATSAPP_AGENT_URL || 'https://osorio-whatsapp-agent-production.up.railway.app').replace(/\/+$/, '');
-const WHATSAPP_AGENT_USER = process.env.WHATSAPP_AGENT_USER || 'osorio';
-const WHATSAPP_OWNER_PHONE = String(process.env.WHATSAPP_OWNER_PHONE || '17865470805').replace(/\D/g, '');
 const COOKIE_NAME = 'osorio_panel_session';
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
 
@@ -87,22 +84,6 @@ function requireAuth(req, res, next) {
   if (!validSession(req)) return res.status(401).json({ error: 'No autorizado' });
   res.setHeader('Cache-Control', 'no-store');
   next();
-}
-
-async function whatsappAgentRequest(pathname, options = {}) {
-  if (!PANEL_PASSWORD) throw new Error('El panel no tiene credenciales configuradas.');
-  const response = await fetch(`${WHATSAPP_AGENT_URL}${pathname}`, {
-    ...options,
-    headers: {
-      'Authorization': `Basic ${Buffer.from(`${WHATSAPP_AGENT_USER}:${PANEL_PASSWORD}`).toString('base64')}`,
-      'Content-Type': 'application/json',
-      ...(options.headers || {})
-    },
-    signal: AbortSignal.timeout(20000)
-  });
-  const body = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(body.error || `WhatsApp respondió ${response.status}`);
-  return body;
 }
 
 async function initializeDatabase() {
@@ -241,37 +222,6 @@ app.patch('/api/leads/:id/status', requireAuth, async (req, res) => {
   if (!lead) return res.status(404).json({ error: 'Prospecto no encontrado' });
   lead.status = status;
   res.json({ lead: { id: lead.id, status } });
-});
-
-app.get('/api/whatsapp/status', requireAuth, async (req, res) => {
-  try {
-    const status = await whatsappAgentRequest('/api/status');
-    res.json(status);
-  } catch (error) {
-    res.status(503).json({ status: 'unavailable', error: error.message });
-  }
-});
-
-app.post('/api/whatsapp/pairing-code', requireAuth, async (req, res) => {
-  try {
-    if (!WHATSAPP_OWNER_PHONE) return res.status(500).json({ error: 'Falta configurar el número de Osorio.' });
-    const result = await whatsappAgentRequest('/api/pairing-code', {
-      method: 'POST',
-      body: JSON.stringify({ phoneNumber: WHATSAPP_OWNER_PHONE })
-    });
-    res.json(result);
-  } catch (error) {
-    res.status(503).json({ error: error.message });
-  }
-});
-
-app.post('/api/whatsapp/test', requireAuth, async (req, res) => {
-  try {
-    const result = await whatsappAgentRequest('/api/test-whatsapp', { method: 'POST', body: '{}' });
-    res.json(result);
-  } catch (error) {
-    res.status(503).json({ error: error.message });
-  }
 });
 
 app.get('/health', async (req, res) => {
