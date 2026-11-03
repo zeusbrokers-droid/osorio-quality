@@ -10,6 +10,8 @@ const PORT = Number(process.env.PORT || 3000);
 const PANEL_PASSWORD = process.env.PANEL_PASSWORD || '';
 const SESSION_SECRET = process.env.SESSION_SECRET || '';
 const DATABASE_URL = process.env.DATABASE_URL || '';
+const WHATSAPP_AGENT_URL = String(process.env.WHATSAPP_AGENT_URL || '').replace(/\/$/, '');
+const WHATSAPP_AGENT_USER = process.env.WHATSAPP_AGENT_USER || 'osorio';
 const COOKIE_NAME = 'osorio_panel_session';
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
 
@@ -206,6 +208,36 @@ app.get('/api/leads', requireAuth, async (req, res) => {
   } catch (error) {
     console.error('lead_list_failed', error.message);
     res.status(500).json({ error: 'No se pudieron cargar los prospectos' });
+  }
+});
+
+app.get('/api/whatsapp/conversations', requireAuth, async (req, res) => {
+  if (!WHATSAPP_AGENT_URL) return res.json({ available: false, conversations: [] });
+  try {
+    const authorization = Buffer.from(`${WHATSAPP_AGENT_USER}:${PANEL_PASSWORD}`).toString('base64');
+    const response = await fetch(`${WHATSAPP_AGENT_URL}/api/leads`, {
+      headers: { authorization: `Basic ${authorization}`, accept: 'application/json' },
+      signal: AbortSignal.timeout(8000)
+    });
+    if (!response.ok) throw new Error(`WhatsApp agent returned ${response.status}`);
+    const payload = await response.json();
+    const conversations = (payload.leads || [])
+      .filter((lead) => lead.status !== 'blocked_minor')
+      .map((lead) => ({
+        id: lead.id,
+        name: lead.name || '',
+        phone: lead.phone || '',
+        classification: lead.classification || null,
+        status: lead.status || 'new',
+        answers: lead.answers || {},
+        updatedAt: lead.updatedAt || lead.createdAt || '',
+        lastMessageAt: lead.lastMessageAt || lead.updatedAt || lead.createdAt || '',
+        messages: Array.isArray(lead.conversation) ? lead.conversation : []
+      }));
+    res.json({ available: true, conversations });
+  } catch (error) {
+    console.error('whatsapp_conversations_failed', error.message);
+    res.status(502).json({ available: false, conversations: [], error: 'No se pudieron cargar las conversaciones de WhatsApp' });
   }
 });
 

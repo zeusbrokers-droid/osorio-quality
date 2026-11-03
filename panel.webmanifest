@@ -1,0 +1,14 @@
+{
+  "name": "Panel OSORIO CIGAR'S",
+  "short_name": "Osorio Panel",
+  "description": "Panel privado de prospectos y conversaciones de OSORIO CIGAR'S.",
+  "start_url": "/panel",
+  "scope": "/",
+  "id": "/panel",
+  "display": "standalone",
+  "background_color": "#080808",
+  "theme_color": "#080808",
+  "icons": [
+    { "src": "/app-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

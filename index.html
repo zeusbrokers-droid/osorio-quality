@@ -3,7 +3,11 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="theme-color" content="#080808"/>
 <title>Osorio Cigar&rsquo;s &ndash; Premium Cigars | Hecho a Mano | Miami, FL</title>
+<link rel="manifest" href="manifest.webmanifest"/>
+<link rel="icon" href="app-icon.svg" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="app-icon.svg"/>
 <meta name="description" content="Osorio Cigar&rsquo;s - Puros premium estilo cubano hechos a mano en Miami. Tradici&oacute;n, elegancia y car&aacute;cter."/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet"/>
 <link href="assistant.css" rel="stylesheet"/>
@@ -203,6 +207,10 @@ footer{background:#040404;border-top:1px solid rgba(201,168,76,.1);padding:40px 
         <span class="btn-icon">&#9993;</span>
         Email
       </a>
+      <button id="installButton" class="btn btn-outline" type="button">
+        <span class="btn-icon">&#8681;</span>
+        Instalar App
+      </button>
     </div>
   </div>
 </section>
@@ -322,6 +330,7 @@ footer{background:#040404;border-top:1px solid rgba(201,168,76,.1);padding:40px 
 </div>
 
 <script src="assistant.js"></script>
+<script src="pwa.js"></script>
 
 </body>
 </html>

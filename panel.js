@@ -8,12 +8,62 @@
   const emptyState = document.querySelector('#emptyState');
   const filter = document.querySelector('#filter');
   const lastUpdated = document.querySelector('#lastUpdated');
+  const conversationList = document.querySelector('#conversationList');
+  const conversationThread = document.querySelector('#conversationThread');
+  const conversationStatus = document.querySelector('#conversationStatus');
   let leads = [];
+  let conversations = [];
+  let selectedConversation = '';
 
   const esc = (value) => String(value ?? '').replace(/[&<>'"]/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
   const phoneDigits = (value) => String(value || '').replace(/\D/g, '');
   const dateText = (value) => new Intl.DateTimeFormat('es-US', { dateStyle:'medium', timeStyle:'short', timeZone:'America/New_York' }).format(new Date(value));
-  const badgeClass = (classification) => classification === 'CALIENTE' ? 'hot' : classification === 'TIBIO' ? 'warm' : 'cold';
+  const badgeClass = (classification) => ['CALIENTE','HOT'].includes(classification) ? 'hot' : ['TIBIO','WARM'].includes(classification) ? 'warm' : 'cold';
+
+  function renderConversations() {
+    const withMessages = conversations.filter((conversation) => conversation.messages.length > 0);
+    if (!withMessages.length) {
+      conversationList.innerHTML = '<p class="conversation-empty">Todavía no hay conversaciones.</p>';
+      conversationThread.innerHTML = '<p class="conversation-empty">Los mensajes nuevos aparecerán aquí automáticamente.</p>';
+      return;
+    }
+    if (!selectedConversation || !withMessages.some((item) => item.id === selectedConversation)) selectedConversation = withMessages[0].id;
+    conversationList.innerHTML = withMessages.map((conversation) => `
+      <button type="button" class="conversation-contact ${conversation.id === selectedConversation ? 'active' : ''}" data-conversation="${encodeURIComponent(conversation.id)}">
+        <strong>${esc(conversation.name || conversation.phone || 'Cliente')}</strong>
+        <span>${esc(conversation.phone || '')}</span>
+        <small>${conversation.lastMessageAt ? dateText(conversation.lastMessageAt) : ''}</small>
+      </button>`).join('');
+    const conversation = withMessages.find((item) => item.id === selectedConversation);
+    conversationThread.innerHTML = `
+      <header class="thread-head">
+        <div><strong>${esc(conversation.name || conversation.phone || 'Cliente')}</strong><span>${esc(conversation.phone || '')}</span></div>
+        <span class="badge ${badgeClass(String(conversation.classification?.code || '').toUpperCase())}">${esc(conversation.classification?.label || 'En proceso')}</span>
+      </header>
+      <div class="messages">${conversation.messages.map((message) => `
+        <article class="message ${message.direction === 'outbound' ? 'outbound' : 'inbound'}">
+          <small>${esc(message.author || (message.direction === 'outbound' ? 'Agente Osorio' : 'Cliente'))}</small>
+          <p>${esc(message.text)}</p>
+          <time>${message.timestamp ? dateText(message.timestamp) : ''}</time>
+        </article>`).join('')}</div>`;
+    const messages = conversationThread.querySelector('.messages');
+    if (messages) messages.scrollTop = messages.scrollHeight;
+  }
+
+  async function loadConversations() {
+    const response = await fetch('/api/whatsapp/conversations', { cache:'no-store' });
+    if (response.status === 401) return showLogin();
+    const payload = await response.json();
+    if (!response.ok || !payload.available) {
+      conversationStatus.textContent = payload.error || 'El agente de WhatsApp no está disponible temporalmente.';
+      conversations = [];
+      renderConversations();
+      return;
+    }
+    conversations = payload.conversations || [];
+    conversationStatus.textContent = 'Mensajes del cliente y respuestas del agente. Se actualiza automáticamente.';
+    renderConversations();
+  }
 
   function showLogin() {
     loginView.hidden = false;
@@ -69,6 +119,7 @@
     showDashboard();
     render();
     lastUpdated.textContent = `Actualizado ${new Intl.DateTimeFormat('es-US', { timeStyle:'short' }).format(new Date())}`;
+    await loadConversations();
   }
 
   loginForm.addEventListener('submit', async (event) => {
@@ -92,6 +143,13 @@
       if (lead) lead.status = event.target.value;
       render();
     }
+  });
+
+  conversationList.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-conversation]');
+    if (!button) return;
+    selectedConversation = decodeURIComponent(button.dataset.conversation);
+    renderConversations();
   });
 
   filter.addEventListener('change', render);
