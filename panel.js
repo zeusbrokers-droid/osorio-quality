@@ -8,6 +8,13 @@
   const emptyState = document.querySelector('#emptyState');
   const filter = document.querySelector('#filter');
   const lastUpdated = document.querySelector('#lastUpdated');
+  const whatsappStatus = document.querySelector('#whatsappStatus');
+  const whatsappMessage = document.querySelector('#whatsappMessage');
+  const whatsappAccount = document.querySelector('#whatsappAccount');
+  const pairButton = document.querySelector('#pairWhatsAppButton');
+  const testButton = document.querySelector('#testWhatsAppButton');
+  const pairingBox = document.querySelector('#pairingBox');
+  const pairingCode = document.querySelector('#pairingCode');
   let leads = [];
 
   const esc = (value) => String(value ?? '').replace(/[&<>'"]/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
@@ -61,6 +68,30 @@
     }).join('');
   }
 
+  function paintWhatsApp(state) {
+    const ready = state.status === 'ready';
+    const waiting = ['waiting_code', 'requesting_code', 'waiting_qr', 'authenticated', 'starting'].includes(state.status);
+    whatsappStatus.className = `connection-badge ${ready ? 'connected' : waiting ? 'checking' : 'disconnected'}`;
+    whatsappStatus.textContent = ready ? 'Conectado' : waiting ? 'Pendiente' : 'Desconectado';
+    whatsappMessage.textContent = ready
+      ? 'El agente está conectado y puede responder mensajes.'
+      : state.error || 'El número debe vincularse para que el agente responda.';
+    whatsappAccount.textContent = state.account ? `Cuenta: ${state.account.replace('@c.us', '')}` : '';
+    pairButton.hidden = ready;
+    testButton.disabled = !ready;
+    if (state.pairingCode) {
+      pairingCode.textContent = state.pairingCode;
+      pairingBox.hidden = false;
+    }
+  }
+
+  async function loadWhatsAppStatus() {
+    const response = await fetch('/api/whatsapp/status', { cache:'no-store' });
+    if (response.status === 401) return showLogin();
+    const state = await response.json();
+    paintWhatsApp(state);
+  }
+
   async function loadLeads() {
     const response = await fetch('/api/leads', { cache:'no-store' });
     if (response.status === 401) return showLogin();
@@ -69,6 +100,7 @@
     showDashboard();
     render();
     lastUpdated.textContent = `Actualizado ${new Intl.DateTimeFormat('es-US', { timeStyle:'short' }).format(new Date())}`;
+    await loadWhatsAppStatus().catch(() => paintWhatsApp({ status:'unavailable', error:'No se pudo consultar el agente.' }));
   }
 
   loginForm.addEventListener('submit', async (event) => {
@@ -92,6 +124,26 @@
       if (lead) lead.status = event.target.value;
       render();
     }
+  });
+
+  pairButton.addEventListener('click', async () => {
+    pairButton.disabled = true;
+    whatsappMessage.textContent = 'Generando código seguro…';
+    const response = await fetch('/api/whatsapp/pairing-code', { method:'POST' });
+    const result = await response.json();
+    pairButton.disabled = false;
+    if (!response.ok) return paintWhatsApp({ status:'disconnected', error:result.error || 'No se pudo generar el código.' });
+    pairingCode.textContent = result.code;
+    pairingBox.hidden = false;
+    paintWhatsApp({ status:'waiting_code', pairingCode:result.code });
+  });
+
+  testButton.addEventListener('click', async () => {
+    testButton.disabled = true;
+    const response = await fetch('/api/whatsapp/test', { method:'POST' });
+    const result = await response.json();
+    testButton.disabled = false;
+    whatsappMessage.textContent = response.ok ? 'Prueba enviada al WhatsApp de Osorio.' : (result.error || 'La prueba falló.');
   });
 
   filter.addEventListener('change', render);
